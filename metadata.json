@@ -1,0 +1,8 @@
+{
+  "name": "ClipCart",
+  "description": "A social commerce platform combining short-form video entertainment with instant shopping capabilities.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
