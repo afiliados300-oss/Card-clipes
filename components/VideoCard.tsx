@@ -46,23 +46,37 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isActive, onOpenPro
     toggleLike(video.id);
   };
 
-  const handleShare = async () => {
+  const handleShare = async (e: React.MouseEvent) => {
+      e.stopPropagation(); // Prevent toggling video play/mute or other parent events
+
       const shareUrl = `${window.location.origin}/video/${video.id}`;
       const shareData = {
           title: `ClipCart: ${video.description}`,
-          text: `Olha esse produto incrível: ${video.product?.name}`,
+          text: `Olha esse produto incrível: ${video.product?.name || 'Confira!'}`,
           url: shareUrl,
       };
 
       try {
-          if (navigator.share) {
+          // 1. Try Native Share (Mobile)
+          if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
               await navigator.share(shareData);
-          } else {
+          } 
+          // 2. Try Clipboard API (Desktop / Secure Context)
+          else if (navigator.clipboard && navigator.clipboard.writeText) {
               await navigator.clipboard.writeText(shareUrl);
               alert("Link copiado para a área de transferência: " + shareUrl);
+          } 
+          // 3. Fallback to prevent crash (Black Screen) in insecure contexts
+          else {
+              window.prompt("Copie o link do vídeo:", shareUrl);
           }
       } catch (err) {
+          // Prevent React Crash boundary from triggering
           console.error("Erro ao compartilhar:", err);
+          if ((err as Error).name !== 'AbortError') {
+             // Only alert if it wasn't the user cancelling the share dialog
+             alert("Não foi possível compartilhar automaticamente. Tente copiar o link manualmente.");
+          }
       }
   };
 
