@@ -1,7 +1,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { Video } from '../types';
-import { HeartIcon, CommentIcon } from './Icons';
+import { HeartIcon, CommentIcon, ShareIcon } from './Icons';
 import { useApp } from '../context/AppContext';
 import { CommentsDrawer } from './CommentsDrawer';
 
@@ -46,6 +46,26 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isActive, onOpenPro
     toggleLike(video.id);
   };
 
+  const handleShare = async () => {
+      const shareUrl = `${window.location.origin}/video/${video.id}`;
+      const shareData = {
+          title: `ClipCart: ${video.description}`,
+          text: `Olha esse produto incrível: ${video.product?.name}`,
+          url: shareUrl,
+      };
+
+      try {
+          if (navigator.share) {
+              await navigator.share(shareData);
+          } else {
+              await navigator.clipboard.writeText(shareUrl);
+              alert("Link copiado para a área de transferência: " + shareUrl);
+          }
+      } catch (err) {
+          console.error("Erro ao compartilhar:", err);
+      }
+  };
+
   return (
     <div className="relative w-full h-full bg-black snap-start shrink-0 overflow-hidden">
       {/* Video Player */}
@@ -86,6 +106,14 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isActive, onOpenPro
         >
           <CommentIcon />
           <span className="text-xs font-bold">{video.comments}</span>
+        </button>
+
+        <button 
+            onClick={handleShare}
+            className="flex flex-col items-center gap-1 transition-transform active:scale-90"
+        >
+          <ShareIcon />
+          <span className="text-xs font-bold">Share</span>
         </button>
       </div>
 
